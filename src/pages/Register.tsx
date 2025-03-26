@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar, EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 const formSchema = z.object({
   businessName: z.string().min(2, {
@@ -29,8 +29,8 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Por favor, introduce una dirección de email válida.",
   }),
-  password: z.string().min(8, {
-    message: "La contraseña debe tener al menos 8 caracteres.",
+  password: z.string().min(6, {
+    message: "La contraseña debe tener al menos 6 caracteres.",
   }),
   terms: z.boolean().refine((val) => val === true, {
     message: "Debes aceptar los términos y condiciones.",
@@ -39,8 +39,8 @@ const formSchema = z.object({
 
 const Register = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { register, loading } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,15 +54,10 @@ const Register = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log(values);
-      setIsLoading(false);
-      toast.success("Cuenta creada con éxito");
-      navigate("/dashboard");
-    }, 1500);
+    const success = await register(values);
+    if (success) {
+      navigate("/connect-services");
+    }
   };
 
   return (
@@ -100,7 +95,7 @@ const Register = () => {
                         <Input 
                           placeholder="Peluquería Ana" 
                           {...field} 
-                          disabled={isLoading}
+                          disabled={loading}
                         />
                       </FormControl>
                       <FormMessage />
@@ -117,7 +112,7 @@ const Register = () => {
                         <Input 
                           placeholder="Tu nombre" 
                           {...field} 
-                          disabled={isLoading}
+                          disabled={loading}
                         />
                       </FormControl>
                       <FormMessage />
@@ -135,7 +130,7 @@ const Register = () => {
                           placeholder="tu@email.com" 
                           {...field} 
                           type="email"
-                          disabled={isLoading}
+                          disabled={loading}
                         />
                       </FormControl>
                       <FormMessage />
@@ -154,7 +149,7 @@ const Register = () => {
                             placeholder="••••••••"
                             type={showPassword ? "text" : "password"}
                             {...field}
-                            disabled={isLoading}
+                            disabled={loading}
                           />
                           <Button
                             type="button"
@@ -184,7 +179,7 @@ const Register = () => {
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          disabled={isLoading}
+                          disabled={loading}
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
@@ -209,8 +204,8 @@ const Register = () => {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Creando cuenta...
@@ -243,7 +238,7 @@ const Register = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-2">
-              <Button variant="outline" type="button" disabled={isLoading}>
+              <Button variant="outline" type="button" disabled={loading}>
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

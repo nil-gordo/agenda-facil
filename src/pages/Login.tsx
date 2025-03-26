@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,21 +16,25 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Calendar, EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 const formSchema = z.object({
   email: z.string().email({
     message: "Por favor, introduce una dirección de email válida.",
   }),
-  password: z.string().min(8, {
-    message: "La contraseña debe tener al menos 8 caracteres.",
+  password: z.string().min(6, {
+    message: "La contraseña debe tener al menos 6 caracteres.",
   }),
 });
 
 const Login = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const { login, loading } = useAuth();
+
+  // Si venimos de alguna ruta protegida, queremos volver allí después del login
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,15 +45,10 @@ const Login = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log(values);
-      setIsLoading(false);
-      toast.success("Inicio de sesión exitoso");
-      navigate("/dashboard");
-    }, 1500);
+    const success = await login(values.email, values.password);
+    if (success) {
+      navigate(from, { replace: true });
+    }
   };
 
   return (
@@ -88,7 +87,7 @@ const Login = () => {
                           placeholder="tu@email.com" 
                           {...field} 
                           type="email"
-                          disabled={isLoading}
+                          disabled={loading}
                         />
                       </FormControl>
                       <FormMessage />
@@ -107,7 +106,7 @@ const Login = () => {
                             placeholder="••••••••"
                             type={showPassword ? "text" : "password"}
                             {...field}
-                            disabled={isLoading}
+                            disabled={loading}
                           />
                           <Button
                             type="button"
@@ -136,8 +135,8 @@ const Login = () => {
                     ¿Olvidaste la contraseña?
                   </Link>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Iniciando sesión...
@@ -170,7 +169,15 @@ const Login = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-2">
-              <Button variant="outline" type="button" disabled={isLoading}>
+              <Button 
+                variant="outline" 
+                type="button" 
+                disabled={loading}
+                onClick={() => {
+                  // Demo: auto-login con email de demo
+                  login("demo@agendafacil.com", "password123");
+                }}
+              >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -190,7 +197,7 @@ const Login = () => {
                   />
                   <path d="M1 1h22v22H1z" fill="none" />
                 </svg>
-                Google
+                Demo - Acceso Rápido
               </Button>
             </div>
           </div>
