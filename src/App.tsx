@@ -17,6 +17,8 @@ import ConnectServices from "./pages/ConnectServices";
 import ServiceSettings from "./pages/ServiceSettings";
 import AppointmentList from "./pages/AppointmentList";
 import ClientList from "./pages/ClientList";
+import MessagesPage from "./pages/MessagesPage";
+import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +71,22 @@ const App = () => (
                 element={
                   <RequireAuth>
                     <ClientList />
+                  </RequireAuth>
+                } 
+              />
+              <Route 
+                path="/messages" 
+                element={
+                  <RequireAuth>
+                    <MessagesPage />
+                  </RequireAuth>
+                } 
+              />
+              <Route 
+                path="/settings" 
+                element={
+                  <RequireAuth>
+                    <SettingsPage />
                   </RequireAuth>
                 } 
               />

@@ -433,12 +433,7 @@ export const api = {
         return { success: false, error: "Usuario no encontrado" };
       }
       
-      // Creamos una URL amigable basada en el nombre del negocio
-      const businessSlug = user.businessName
-        .toLowerCase()
-        .replace(/[^\w\s]/gi, '')
-        .replace(/\s+/g, '-');
-      
+      // Creamos una URL basada en el ID del usuario
       return { 
         success: true, 
         data: `/booking/${userId}` 
@@ -466,4 +461,3 @@ export const api = {
     }
   }
 };
-
