@@ -6,7 +6,16 @@
  */
 export const getPublicBookingUrl = (relativePath: string): string => {
   const baseUrl = window.location.origin;
-  return `${baseUrl}${relativePath}`;
+  
+  // Si ya es una ruta completa (comienza con el origin), devolverla tal cual
+  if (relativePath.startsWith(baseUrl)) {
+    return relativePath;
+  }
+  
+  // Asegurarnos de que la ruta comience con /
+  const normalizedPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+  
+  return `${baseUrl}${normalizedPath}`;
 };
 
 /**

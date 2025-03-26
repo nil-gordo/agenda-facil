@@ -425,6 +425,9 @@ export const api = {
   // Obtener URL pública
   getPublicUrl: async (userId: string): Promise<ApiResponse<string>> => {
     try {
+      // Simulamos una pequeña latencia
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       // Obtenemos el usuario
       const users = getLocalStorage<User[]>("users") || [];
       const user = users.find(u => u.id === userId);
@@ -434,9 +437,10 @@ export const api = {
       }
       
       // Creamos una URL basada en el ID del usuario
+      const bookingPath = `/booking/${userId}`;
       return { 
         success: true, 
-        data: `/booking/${userId}` 
+        data: bookingPath
       };
     } catch (error) {
       console.error("Get public URL error:", error);

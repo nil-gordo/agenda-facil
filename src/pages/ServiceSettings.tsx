@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -41,7 +40,8 @@ import { Service } from "@/types";
 import { motion } from "framer-motion";
 import DashboardLayout from "@/components/DashboardLayout";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Link as LinkIcon, Copy, ArrowRight } from "lucide-react";
+import PublicBookingLink from "@/components/PublicBookingLink";
+import { Loader2, Plus, Trash2, ArrowRight } from "lucide-react";
 
 const serviceSchema = z.object({
   id: z.string().optional(),
@@ -211,7 +211,6 @@ const ServiceSettings = () => {
             <Card className="bg-primary/5">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <LinkIcon className="h-5 w-5 text-primary" />
                   Tu enlace para reservas
                 </CardTitle>
                 <CardDescription>
@@ -219,14 +218,7 @@ const ServiceSettings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-2">
-                  <div className="bg-background border rounded-md px-4 py-2 flex-1 text-muted-foreground overflow-hidden text-ellipsis">
-                    <span id="public-url">{window.location.origin}{publicUrl}</span>
-                  </div>
-                  <Button variant="outline" size="icon" onClick={copyToClipboard}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
+                {user?.id && <PublicBookingLink userId={user.id} />}
               </CardContent>
             </Card>
 
