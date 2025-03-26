@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import ConnectServices from "./pages/ConnectServices";
 import ServiceSettings from "./pages/ServiceSettings";
 import AppointmentList from "./pages/AppointmentList";
+import ClientList from "./pages/ClientList";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,14 @@ const App = () => (
                 element={
                   <RequireAuth>
                     <AppointmentList />
+                  </RequireAuth>
+                } 
+              />
+              <Route 
+                path="/clients" 
+                element={
+                  <RequireAuth>
+                    <ClientList />
                   </RequireAuth>
                 } 
               />

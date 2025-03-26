@@ -29,6 +29,16 @@ export interface Booking {
   userId: string;
 }
 
+export interface Client {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  lastVisit?: string;
+  totalBookings: number;
+  userId: string;
+}
+
 export interface TimeSlot {
   time: string;
   available: boolean;

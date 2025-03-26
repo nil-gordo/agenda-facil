@@ -1,5 +1,4 @@
-
-import { User, Service, Booking, TimeSlot, ApiResponse } from "@/types";
+import { User, Service, Booking, TimeSlot, ApiResponse, Client } from "@/types";
 
 // Simulación de localStorage para persistencia de datos
 const getLocalStorage = <T>(key: string): T | null => {
@@ -318,6 +317,32 @@ export const api = {
       allBookings[booking.userId] = [...userBookings, newBooking];
       setLocalStorage("bookings", allBookings);
       
+      // También actualizamos o creamos el cliente
+      const allClients = getLocalStorage<Record<string, Client[]>>("clients") || {};
+      const userClients = allClients[booking.userId] || [];
+      
+      // Verificamos si el cliente ya existe
+      const existingClientIndex = userClients.findIndex(c => c.phone === booking.clientPhone);
+      
+      if (existingClientIndex >= 0) {
+        // Actualizamos cliente existente
+        userClients[existingClientIndex].totalBookings += 1;
+        userClients[existingClientIndex].lastVisit = booking.date;
+      } else {
+        // Creamos nuevo cliente
+        userClients.push({
+          id: `client_${Date.now()}`,
+          name: booking.clientName,
+          phone: booking.clientPhone || "",
+          totalBookings: 1,
+          lastVisit: booking.date,
+          userId: booking.userId
+        });
+      }
+      
+      allClients[booking.userId] = userClients;
+      setLocalStorage("clients", allClients);
+      
       // Simulamos envío a n8n
       console.log("POST to http://tun8n.com/webhook/reserve", {
         userId: booking.userId,
@@ -422,5 +447,23 @@ export const api = {
       console.error("Get public URL error:", error);
       return { success: false, error: "Error al generar URL pública" };
     }
+  },
+  
+  // Clientes
+  getClients: async (userId: string): Promise<ApiResponse<Client[]>> => {
+    try {
+      // Simulamos una llamada a la API
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Obtenemos los clientes del localStorage
+      const allClients = getLocalStorage<Record<string, Client[]>>("clients") || {};
+      const userClients = allClients[userId] || [];
+      
+      return { success: true, data: userClients };
+    } catch (error) {
+      console.error("Get clients error:", error);
+      return { success: false, error: "Error al obtener clientes" };
+    }
   }
 };
+
