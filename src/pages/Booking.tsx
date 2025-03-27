@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -79,10 +78,15 @@ const Booking = () => {
   const selectedDateValue = form.watch("date");
 
   useEffect(() => {
+    console.log("Booking page mounted with businessId:", businessId);
     if (businessId) {
       loadBusinessData();
+    } else {
+      console.error("No businessId provided in URL");
+      toast.error("ID de negocio no encontrado");
+      navigate("/");
     }
-  }, [businessId]);
+  }, [businessId, navigate]);
 
   useEffect(() => {
     if (selectedDateValue && businessId) {
@@ -93,11 +97,13 @@ const Booking = () => {
   const loadBusinessData = async () => {
     setLoading(true);
     try {
+      console.log("Loading business data for ID:", businessId);
       // En una implementación real, cargaríamos los datos del negocio
       // Aquí simulamos obtenerlos del localStorage
       const users = JSON.parse(localStorage.getItem("users") || "[]");
       const currentBusiness = users.find((u: User) => u.id === businessId);
       
+      console.log("Found business:", currentBusiness);
       if (currentBusiness) {
         setBusiness(currentBusiness);
         
@@ -105,8 +111,10 @@ const Booking = () => {
         const response = await api.getServices(businessId);
         if (response.success && response.data) {
           setServices(response.data);
+          console.log("Loaded services:", response.data);
         }
       } else {
+        console.error("Business not found in localStorage");
         toast.error("Negocio no encontrado");
         navigate("/");
       }
