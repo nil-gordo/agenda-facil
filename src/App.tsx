@@ -22,6 +22,11 @@ import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
+// Initialize empty localStorage for users if not exists
+if (!localStorage.getItem("users")) {
+  localStorage.setItem("users", JSON.stringify([]));
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -34,7 +39,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              {/* Importante: Colocar la ruta /booking/:businessId antes de las rutas con RequireAuth */}
+              {/* Important: Always place the booking route before protected routes */}
               <Route path="/booking/:businessId" element={<Booking />} />
               <Route 
                 path="/dashboard" 

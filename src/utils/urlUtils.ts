@@ -1,53 +1,54 @@
-
 /**
- * Construye una URL completa para el enlace público de reservas
- * @param relativePath Ruta relativa (ej. '/booking/user_123')
- * @returns URL completa con el dominio actual
+ * Gets the full public booking URL with the correct domain and path
  */
-export const getPublicBookingUrl = (relativePath: string): string => {
+export const getPublicBookingUrl = (path: string): string => {
+  // If path already has the full URL, return it
+  if (path.startsWith('http')) return path;
+  
+  // If path already starts with a slash, use it as is, otherwise add it
+  const formattedPath = path.startsWith('/') ? path : `/${path}`;
+  
+  // Use current domain as base for the booking URL
   const baseUrl = window.location.origin;
   
-  // Si ya es una ruta completa (comienza con http o https), devolverla tal cual
-  if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
-    return relativePath;
-  }
-  
-  // Si ya es una ruta completa (comienza con el origin), devolverla tal cual
-  if (relativePath.startsWith(baseUrl)) {
-    return relativePath;
-  }
-  
-  // Asegurarnos de que la ruta comience con /
-  const normalizedPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
-  
-  return `${baseUrl}${normalizedPath}`;
+  return `${baseUrl}${formattedPath}`;
 };
 
 /**
- * Copia un texto al portapapeles
- * @param text Texto a copiar
- * @returns Promise que se resuelve cuando se ha copiado
+ * Check if a string is a valid URL
  */
-export const copyToClipboard = async (text: string): Promise<boolean> => {
+export const isValidUrl = (urlString: string): boolean => {
   try {
-    await navigator.clipboard.writeText(text);
+    new URL(urlString);
     return true;
-  } catch (error) {
-    console.error("Error al copiar al portapapeles:", error);
+  } catch (e) {
     return false;
   }
 };
 
 /**
- * Verifica si una URL es válida
- * @param url URL a verificar
- * @returns true si la URL es válida, false en caso contrario
+ * Helper function to copy text to clipboard
  */
-export const isValidUrl = (url: string): boolean => {
+export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
-    new URL(url);
-    return true;
-  } catch (e) {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    
+    // Fallback for browsers without clipboard API
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    const success = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    return success;
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
     return false;
   }
 };

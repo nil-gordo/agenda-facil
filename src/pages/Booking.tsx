@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -25,12 +25,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { api } from "@/services/api";
-import { Service, TimeSlot } from "@/types";
+import { Service, TimeSlot, User } from "@/types";
 import { CalendarDays, Clock, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const Booking = () => {
   const { businessId } = useParams<{ businessId: string }>();
+  const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -43,16 +44,24 @@ const Booking = () => {
   const [businessName, setBusinessName] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [businessUser, setBusinessUser] = useState<User | null>(null);
 
   useEffect(() => {
+    if (!businessId) {
+      setError("ID de negocio no proporcionado");
+      setLoading(false);
+      return;
+    }
+    
+    console.log("Loading business data for ID:", businessId);
     loadBusinessData();
   }, [businessId]);
 
   useEffect(() => {
-    if (businessId && selectedDate) {
+    if (businessId && selectedDate && businessUser) {
       loadTimeSlots();
     }
-  }, [businessId, selectedDate, selectedService]);
+  }, [businessId, selectedDate, selectedService, businessUser]);
 
   const loadBusinessData = async () => {
     if (!businessId) {
@@ -67,29 +76,48 @@ const Booking = () => {
     try {
       console.log("Looking for user with ID:", businessId);
       
-      // Obtener usuarios para verificar si existe
-      const users = localStorage.getItem("users");
-      const parsedUsers = users ? JSON.parse(users) : [];
-      const currentUser = parsedUsers.find((user: any) => user.id === businessId);
-      
-      if (!currentUser) {
-        console.error("No se encontró el usuario con ID:", businessId);
+      // Get users directly from localStorage
+      const usersJSON = localStorage.getItem("users");
+      if (!usersJSON) {
+        console.error("No users found in localStorage");
         setError("No se encontraron usuarios en el sistema");
         setLoading(false);
         return;
       }
       
-      // Establecer el nombre del negocio
+      const parsedUsers = JSON.parse(usersJSON);
+      console.log("Found users in localStorage:", parsedUsers);
+      
+      if (!Array.isArray(parsedUsers) || parsedUsers.length === 0) {
+        console.error("Users is not an array or is empty");
+        setError("No se encontraron usuarios en el sistema");
+        setLoading(false);
+        return;
+      }
+      
+      const currentUser = parsedUsers.find((user: User) => user.id === businessId);
+      
+      if (!currentUser) {
+        console.error("No user found with ID:", businessId);
+        setError("No se encontró el negocio especificado");
+        setLoading(false);
+        return;
+      }
+      
+      console.log("Found business user:", currentUser);
+      setBusinessUser(currentUser);
       setBusinessName(currentUser.businessName || "Negocio");
       
-      // Cargar servicios
+      // Load services
       const response = await api.getServices(businessId);
+      console.log("Services response:", response);
+      
       if (response.success && response.data) {
         if (response.data.length === 0) {
           setError("Este negocio aún no ha configurado sus servicios");
         } else {
           setServices(response.data);
-          // Preseleccionar el primer servicio
+          // Preselect first service
           setSelectedService(response.data[0].id);
         }
       } else {
@@ -184,7 +212,7 @@ const Booking = () => {
             </Alert>
           </CardContent>
           <CardFooter>
-            <Button onClick={() => window.location.href = "/"} variant="outline" className="w-full">
+            <Button onClick={() => navigate("/")} variant="outline" className="w-full">
               Volver al inicio
             </Button>
           </CardFooter>
