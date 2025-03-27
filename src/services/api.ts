@@ -428,16 +428,27 @@ export const api = {
       // Simulamos una pequeña latencia
       await new Promise(resolve => setTimeout(resolve, 300));
       
+      // Verificamos que el userId es válido
+      if (!userId) {
+        console.error("No userId provided to getPublicUrl");
+        return { success: false, error: "ID de usuario no proporcionado" };
+      }
+      
+      console.log("Getting public URL for userId:", userId);
+      
       // Obtenemos el usuario
       const users = getLocalStorage<User[]>("users") || [];
       const user = users.find(u => u.id === userId);
       
       if (!user) {
+        console.error("User not found in getPublicUrl:", userId);
         return { success: false, error: "Usuario no encontrado" };
       }
       
       // Creamos una URL basada en el ID del usuario
       const bookingPath = `/booking/${userId}`;
+      console.log("Generated booking path:", bookingPath);
+      
       return { 
         success: true, 
         data: bookingPath

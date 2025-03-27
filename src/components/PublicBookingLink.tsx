@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Link, Copy, ExternalLink } from "lucide-react";
 import { api } from "@/services/api";
-import { getPublicBookingUrl, copyToClipboard } from "@/utils/urlUtils";
+import { getPublicBookingUrl, copyToClipboard, isValidUrl } from "@/utils/urlUtils";
 
 interface PublicBookingLinkProps {
   userId: string;
@@ -38,6 +38,7 @@ const PublicBookingLink = ({
     try {
       const response = await api.getPublicUrl(userId);
       if (response.success && response.data) {
+        console.log("Public URL response:", response.data);
         setPublicUrl(response.data);
       } else {
         console.error("Error loading public URL:", response.error);
@@ -62,7 +63,9 @@ const PublicBookingLink = ({
     }
   };
 
+  // Ensure we have a valid URL for display and navigation
   const displayUrl = publicUrl ? getPublicBookingUrl(publicUrl) : "";
+  const isUrlValid = displayUrl && isValidUrl(displayUrl);
   
   if (loading) {
     return <Skeleton className="h-9 w-full" />;
@@ -92,7 +95,7 @@ const PublicBookingLink = ({
         </Button>
       )}
       
-      {showVisitButton && (
+      {showVisitButton && isUrlValid && (
         <Button
           variant={variant}
           size="icon"

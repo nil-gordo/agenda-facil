@@ -7,6 +7,11 @@
 export const getPublicBookingUrl = (relativePath: string): string => {
   const baseUrl = window.location.origin;
   
+  // Si ya es una ruta completa (comienza con http o https), devolverla tal cual
+  if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+    return relativePath;
+  }
+  
   // Si ya es una ruta completa (comienza con el origin), devolverla tal cual
   if (relativePath.startsWith(baseUrl)) {
     return relativePath;
@@ -29,6 +34,20 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
     return true;
   } catch (error) {
     console.error("Error al copiar al portapapeles:", error);
+    return false;
+  }
+};
+
+/**
+ * Verifica si una URL es válida
+ * @param url URL a verificar
+ * @returns true si la URL es válida, false en caso contrario
+ */
+export const isValidUrl = (url: string): boolean => {
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
     return false;
   }
 };

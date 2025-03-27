@@ -74,7 +74,6 @@ const Booking = () => {
     },
   });
   
-  // Observar cambios en el campo de fecha
   const selectedDateValue = form.watch("date");
 
   useEffect(() => {
@@ -98,20 +97,32 @@ const Booking = () => {
     setLoading(true);
     try {
       console.log("Loading business data for ID:", businessId);
-      // En una implementación real, cargaríamos los datos del negocio
-      // Aquí simulamos obtenerlos del localStorage
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-      const currentBusiness = users.find((u: User) => u.id === businessId);
+      const users = localStorage.getItem("users");
+      console.log("Retrieved users from localStorage:", users);
+      
+      if (!users) {
+        console.error("No users found in localStorage");
+        toast.error("No se encontraron usuarios en el sistema");
+        navigate("/");
+        return;
+      }
+      
+      const parsedUsers = JSON.parse(users);
+      console.log("Parsed users:", parsedUsers);
+      
+      const currentBusiness = parsedUsers.find((u: User) => u.id === businessId);
       
       console.log("Found business:", currentBusiness);
       if (currentBusiness) {
         setBusiness(currentBusiness);
         
-        // Cargamos los servicios
         const response = await api.getServices(businessId);
         if (response.success && response.data) {
           setServices(response.data);
           console.log("Loaded services:", response.data);
+        } else {
+          console.error("Error loading services:", response.error);
+          toast.error("Error al cargar los servicios");
         }
       } else {
         console.error("Business not found in localStorage");
@@ -121,6 +132,7 @@ const Booking = () => {
     } catch (error) {
       console.error("Error loading business data:", error);
       toast.error("Error al cargar datos del negocio");
+      navigate("/");
     } finally {
       setLoading(false);
     }
@@ -134,7 +146,6 @@ const Booking = () => {
       if (response.success && response.data) {
         setTimeSlots(response.data);
         
-        // Si hay un horario seleccionado y ya no está disponible, lo reseteamos
         const currentTime = form.getValues("time");
         if (currentTime) {
           const isCurrentTimeAvailable = response.data.some(
@@ -156,7 +167,6 @@ const Booking = () => {
     
     setSubmitting(true);
     try {
-      // Preparamos los datos para la reserva
       const booking = {
         userId: businessId,
         clientName: values.clientName,
@@ -166,7 +176,6 @@ const Booking = () => {
         time: values.time
       };
       
-      // Enviamos la reserva
       const response = await api.createBooking(booking);
       
       if (response.success) {
@@ -175,7 +184,6 @@ const Booking = () => {
           description: "Te llegará un mensaje de confirmación por WhatsApp."
         });
         
-        // Reseteamos el formulario
         form.reset();
         setSelectedDate(null);
       } else {
@@ -197,14 +205,12 @@ const Booking = () => {
     }
   };
 
-  // Determinar si el día está deshabilitado (fines de semana o fechas pasadas)
   const isDateDisabled = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return date < today;
   };
 
-  // Buscar el servicio seleccionado
   const selectedService = services.find(s => s.id === form.getValues("serviceId"));
 
   return (

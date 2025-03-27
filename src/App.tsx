@@ -90,6 +90,7 @@ const App = () => (
                   </RequireAuth>
                 } 
               />
+              {/* El orden de las rutas es importante - poner booking/:businessId antes de otras rutas similares */}
               <Route path="/booking/:businessId" element={<Booking />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
