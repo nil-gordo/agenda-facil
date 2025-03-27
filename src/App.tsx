@@ -34,6 +34,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              {/* Importante: Colocar la ruta /booking/:businessId antes de las rutas con RequireAuth */}
+              <Route path="/booking/:businessId" element={<Booking />} />
               <Route 
                 path="/dashboard" 
                 element={
@@ -90,8 +92,6 @@ const App = () => (
                   </RequireAuth>
                 } 
               />
-              {/* El orden de las rutas es importante - poner booking/:businessId antes de otras rutas similares */}
-              <Route path="/booking/:businessId" element={<Booking />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AnimatePresence>
