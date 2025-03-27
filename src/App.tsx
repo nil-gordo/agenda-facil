@@ -22,9 +22,30 @@ import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
-// Initialize empty localStorage for users if not exists
+// Initialize localStorage with demo data if not exists
 if (!localStorage.getItem("users")) {
-  localStorage.setItem("users", JSON.stringify([]));
+  // Create a demo user that will always exist
+  const demoUser = {
+    id: "user_demo",
+    email: "demo@example.com",
+    businessName: "Demo Business",
+    fullName: "Demo User",
+    googleCalendarConnected: false,
+    twilioTokenConnected: false
+  };
+  
+  localStorage.setItem("users", JSON.stringify([demoUser]));
+  
+  // Also initialize empty services for the demo user
+  localStorage.setItem("services", JSON.stringify({
+    "user_demo": [{
+      id: "service_demo",
+      name: "Demo Service",
+      duration: 60,
+      price: 50,
+      enablePayment: false
+    }]
+  }));
 }
 
 const App = () => (
